@@ -5,7 +5,7 @@ from pathlib import Path
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .database import SessionLocal
 from .models import Incident
@@ -17,10 +17,13 @@ REPORTS_DIR.mkdir(exist_ok=True)
 
 def generate_report(incident_id: int) -> str:
     db: Session = SessionLocal()
-    incident = db.query(Incident).filter(Incident.id == incident_id).first()
-    db.close()
+    incident = db.query(Incident).options(joinedload(Incident.violations)).filter(Incident.id == incident_id).first()
     if not incident:
+        db.close()
         raise FileNotFoundError(f"Incident {incident_id} not found")
+    # Force-load relationship data before closing the session
+    incident.violations = list(incident.violations)
+    db.close()
 
     target_path = REPORTS_DIR / f"incident_{incident.id}.pdf"
     c = canvas.Canvas(str(target_path), pagesize=letter)

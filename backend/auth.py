@@ -21,7 +21,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@roadguard.ai")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 router = APIRouter(prefix="/auth", tags=["auth"])
 
