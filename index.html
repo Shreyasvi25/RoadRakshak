@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚗 RoadGuard AI</title>
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #0f0f0f, #1a1a1a);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #00ffcc;
+        }
+
+        #video {
+            margin-top: 20px;
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        #alert {
+            margin-top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: red;
+            animation: blink 1s infinite;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #00ffcc;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚗 RoadGuard AI - Live Traffic Monitoring</h1>
+
+<img id="video" width="640" />
+
+<div id="alert"></div>
+<div id="status">🟢 System Running...</div>
+
+<div class="footer">
+    Powered by YOLOv8 + FastAPI + WebSocket 🚀
+</div>
+
+<script>
+    const ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        // Show video
+        document.getElementById("video").src =
+            "data:image/jpeg;base64," + data.frame;
+
+        // Alert handling
+        if (data.collision) {
+            document.getElementById("alert").innerText = "🚨 COLLISION DETECTED!";
+            document.getElementById("status").innerText = "🔴 ALERT MODE";
+        } else {
+            document.getElementById("alert").innerText = "";
+            document.getElementById("status").innerText = "🟢 Monitoring Traffic...";
+        }
+    };
+
+    ws.onopen = () => {
+        console.log("Connected to server ✅");
+    };
+
+    ws.onerror = () => {
+        document.getElementById("status").innerText = "⚠️ Connection Error";
+    };
+
+    ws.onclose = () => {
+        document.getElementById("status").innerText = "❌ Disconnected";
+    };
+</script>
+
+</body>
+</html>
